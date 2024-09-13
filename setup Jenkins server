@@ -1,0 +1,124 @@
+# Setup Jenkins server on ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-20240701.1 (AWS EC2) 
+
+
+#bin/bash
+
+sudo timedatectl set-timezone America/New_York
+sudo hostnamectl set-hostname jenkins-u
+
+# Install tools
+
+sudo apt-get install wget git -y
+
+
+#1# Install Jenkins
+
+sudo apt-get install openjdk-11-jdk -y
+
+sudo wget -O /usr/share/keyrings/jenkins-keyring.asc \
+  https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc]" \
+  https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
+  /etc/apt/sources.list.d/jenkins.list > /dev/null
+sudo apt-get update -y
+sudo apt-get install jenkins -y
+
+# Enable Jenkins
+
+sudo systemctl start jenkins
+sudo systemctl enable jenkins
+sudo systemctl daemon-reload
+
+# make jenkins user a sudo user
+
+sudo echo "jenkins ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/jenkins
+
+
+## Become Jenkins user
+
+sudo su - jenkins
+
+#2# Install awscli
+
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" 
+
+sudo apt install unzip
+
+sudo unzip awscliv2.zip  
+
+sudo rm awscliv2.zip
+
+sudo ./aws/install
+
+aws --version
+
+#3# Install Helm3
+
+#Download scripts 
+
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+
+# provide permission
+
+sudo chmod 700 get_helm.sh
+
+# Execute script to install
+
+sudo ./get_helm.sh
+
+
+# Verify installation
+
+helm version --client
+
+#4# Install kubectl
+
+sudo curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+ sudo chmod +x ./kubectl
+ sudo mv ./kubectl /usr/local/bin/kubectl
+
+# Verify if kubectl got installed
+
+kubectl version --client
+
+#5# Install ekscli
+
+# Download and extract the latest release of eksctl with the following command
+
+curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+
+# Move the extracted binary to /usr/local/bin. 
+
+sudo mv /tmp/eksctl /usr/local/bin
+
+# Verify installation
+
+eksctl version
+
+
+#6# Install Docker
+
+# Update local packages by executing below command:
+
+sudo apt update -y
+
+# Install the below packages
+
+sudo apt install gnupg2 pass -y
+
+### gnupg2 is tool for secure communication and data storage. It can be used to encrypt data and to create digital signatures ###
+
+# Install docker
+
+sudo apt-get update -y
+sudo apt-get install docker.io -y
+sudo systemctl start docker
+sudo systemctl enable docker.service
+
+# Add Jenkins user to Docker group
+
+sudo usermod -aG docker jenkins
+
+# Reload docker
+
+sudo systemctl restart docker.service
