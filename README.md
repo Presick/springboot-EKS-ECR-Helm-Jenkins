@@ -1,4 +1,4 @@
-## PROJECT
+## PROJECT ##
 
 ##### Context
 We want to deploy a Springboot application on an EKS cluster using Helm, Jenkins as CI tool, ECR as Container image registry. 
@@ -59,15 +59,15 @@ open mychart/templates/deployment.yaml and change containerPort to 8080
 ![image](https://github.com/user-attachments/assets/12647652-d72a-4898-876d-ed18bf101beb)
 
 ##### step 4 Create EKS cluster
-# Create cluster
+
 
 eksctl create cluster --name my-demo-eks --region us-east-1 --nodegroup-name my-demo-nodes --node-type t3.small --managed --nodes 2
 
-# confirm that EKS cluster is up and running
+###### confirm that EKS cluster is up and running
 
 eksctl get cluster --name my-demo-eks --region us-east-1
 
-# Update Kube config
+###### Update Kube config
 
 aws eks update-kubeconfig --name demo-eks --region us-east-1
 ##### step 5 create namespace in EKS
